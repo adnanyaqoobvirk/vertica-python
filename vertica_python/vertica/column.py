@@ -1,7 +1,11 @@
 from collections import namedtuple
 import re
 
-from builtins import str
+try:
+    from builtins import str
+except ImportError:
+    from __builtin__ import str
+
 from decimal import Decimal
 from datetime import date
 from datetime import datetime
@@ -32,6 +36,7 @@ years_re = re.compile(r'^([0-9]+)-')
 # timestamptz type stores: 2013-01-01 05:00:00.01+00
 #       select t AT TIMEZONE 'America/New_York' returns: 2012-12-31 19:00:00.01
 def timestamp_parse(s):
+    s = s.decode('utf-8') if type(s) == bytes else s
     try:
         dt = _timestamp_parse(s)
     except ValueError:
@@ -82,6 +87,12 @@ def date_parse(s):
 
     return date(*[int(x) for x in s.split(b'-')])
 
+def convert_bytes_to_string(s):
+    try:
+        return str(s, 'utf-8')
+    except TypeError:
+        return unicode(s, 'utf-8')
+            
 ColumnTuple = namedtuple(
     'Column',
     ['name', 'type_code', 'display_size', 'internal_size',
@@ -100,8 +111,8 @@ class Column(object):
         ('bool', lambda s: s == 't'),
         ('integer', lambda s: int(s)),
         ('float', lambda s: float(s)),
-        ('char', lambda s: str(s, 'utf-8')),
-        ('varchar', lambda s: str(s, 'utf-8')),
+        ('char', convert_bytes_to_string),
+        ('varchar', convert_bytes_to_string),
         ('date', date_parse),
         ('time', None),
         ('timestamp', timestamp_parse),

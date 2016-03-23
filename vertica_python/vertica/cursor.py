@@ -3,7 +3,10 @@
 import re
 import logging
 
-from builtins import str
+try:
+    from builtins import str
+except ImportError:
+    from __builtin__ import str
 
 import vertica_python.errors as errors
 

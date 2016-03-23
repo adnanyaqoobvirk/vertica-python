@@ -1,6 +1,9 @@
 
+try:
+    from builtins import range
+except ImportError:
+    from __builtin__ import range
 
-from builtins import range
 from struct import unpack, unpack_from
 
 from vertica_python.vertica.messages.message import BackendMessage
